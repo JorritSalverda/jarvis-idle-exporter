@@ -37,11 +37,10 @@ impl MeasurementClient<Config> for IdleClient {
 
             // ensure counter increases from previous value
             let counter_value = if let Some(last_measurement) = last_measurement.as_ref() {
-                if let Some(sample) = last_measurement
-                    .samples
-                    .iter()
-                    .find(|s| s.sample_name == sample_config.sample_name)
-                {
+                if let Some(sample) = last_measurement.samples.iter().find(|s| {
+                    s.sample_name == sample_config.sample_name
+                        && s.metric_type == MetricType::Counter
+                }) {
                     sample.value + counter_increment
                 } else {
                     counter_increment
