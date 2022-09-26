@@ -26,6 +26,15 @@ impl MeasurementClient<Config> for IdleClient {
         };
 
         for sample_config in config.sample_configs {
+            let instance_count = if let Some(instance_count) = sample_config.instance_count {
+                instance_count as f64
+            } else {
+                1_f64
+            };
+
+            let counter_increment =
+                sample_config.value_watt * config.interval_seconds * instance_count;
+
             // ensure counter increases from previous value
             let counter_value = if let Some(last_measurement) = last_measurement.as_ref() {
                 if let Some(sample) = last_measurement
@@ -33,12 +42,12 @@ impl MeasurementClient<Config> for IdleClient {
                     .iter()
                     .find(|s| s.sample_name == sample_config.sample_name)
                 {
-                    sample.value + sample_config.value_watt * config.interval_seconds
+                    sample.value + counter_increment
                 } else {
-                    sample_config.value_watt * config.interval_seconds
+                    counter_increment
                 }
             } else {
-                sample_config.value_watt * config.interval_seconds
+                counter_increment
             };
 
             // store as gauge for timeline graphs
@@ -48,7 +57,7 @@ impl MeasurementClient<Config> for IdleClient {
                 sample_type: SampleType::ElectricityConsumption,
                 sample_name: sample_config.sample_name.clone(),
                 metric_type: MetricType::Gauge,
-                value: sample_config.value_watt,
+                value: sample_config.value_watt * instance_count,
             });
 
             // store as counter for totals

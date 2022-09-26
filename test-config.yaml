@@ -3,3 +3,6 @@ intervalSeconds: 300
 sampleConfigs:
 - sampleName: AmpliFi AFi-P-HD antenna
   valueWatt: 3.7
+- sampleName: TP-Link HS110
+  valueWatt: 1.32
+  instanceCount: 20
