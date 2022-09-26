@@ -1,0 +1,6 @@
+location: My Home
+intervalSeconds: 300
+sampleConfigs:
+- sampleName: AmpliFi AFi-P-HD antenna
+  metricType: METRIC_TYPE_GAUGE
+  valueWatt: 3.7

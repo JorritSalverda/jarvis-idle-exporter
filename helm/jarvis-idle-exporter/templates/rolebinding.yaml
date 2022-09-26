@@ -1,0 +1,16 @@
+{{- if .Values.rbac.enable -}}
+apiVersion: rbac.authorization.k8s.io/v1
+kind: RoleBinding
+metadata:
+  name: {{ include "jarvis-idle-exporter.fullname" . }}
+  labels:
+    {{- include "jarvis-idle-exporter.labels" . | nindent 4 }}
+roleRef:
+  apiGroup: rbac.authorization.k8s.io
+  kind: Role
+  name: {{ include "jarvis-idle-exporter.fullname" . }}
+subjects:
+- kind: ServiceAccount
+  name: {{ include "jarvis-idle-exporter.serviceAccountName" . }}
+  namespace: {{ .Release.Namespace }}
+{{- end -}}
