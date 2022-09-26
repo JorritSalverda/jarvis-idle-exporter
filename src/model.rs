@@ -1,4 +1,4 @@
-use jarvis_lib::{config_client::SetDefaults, model::MetricType};
+use jarvis_lib::config_client::SetDefaults;
 use serde::{Deserialize, Serialize};
 
 #[derive(Serialize, Deserialize, Debug)]
@@ -19,7 +19,6 @@ impl SetDefaults for Config {
 pub struct ConfigSample {
     // default jarvis config for sample
     pub sample_name: String,
-    pub metric_type: MetricType,
     pub value_watt: f64,
 }
 
@@ -42,7 +41,6 @@ mod tests {
             config.sample_configs[0].sample_name,
             "AmpliFi AFi-P-HD antenna".to_string()
         );
-        assert_eq!(config.sample_configs[0].metric_type, MetricType::Gauge);
         assert_eq!(config.sample_configs[0].value_watt, 3.7f64);
     }
 }
