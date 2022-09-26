@@ -60,10 +60,6 @@ spec:
                   key: nats-subject
             - name: MEASUREMENT_FILE_CONFIG_MAP_NAME
               value: {{ include "jarvis-idle-exporter.fullname" . }}
-            ports:
-            - name: udp
-              containerPort: 5353
-              protocol: UDP
             resources:
               {{- toYaml .Values.resources | nindent 14 }}
             volumeMounts:
@@ -81,8 +77,6 @@ spec:
           tolerations:
             {{- toYaml . | nindent 12 }}
           {{- end }}
-          hostNetwork: true
-          dnsPolicy: ClusterFirstWithHostNet
           terminationGracePeriodSeconds: 300
           volumes:
           - name: configs
