@@ -32,21 +32,19 @@ impl MeasurementClient<Config> for IdleClient {
                 1_f64
             };
 
-            let counter_increment =
-                sample_config.value_watt * config.interval_seconds * instance_count;
-
-            // ensure counter increases from previous value
-            let counter_value = if let Some(last_measurement) = last_measurement.as_ref() {
+            // get previous counter value to have a continuously increasing counter
+            let last_counter_value: f64 = if let Some(last_measurement) = last_measurement.as_ref()
+            {
                 if let Some(sample) = last_measurement.samples.iter().find(|s| {
                     s.sample_name == sample_config.sample_name
                         && s.metric_type == MetricType::Counter
                 }) {
-                    sample.value + counter_increment
+                    sample.value
                 } else {
-                    counter_increment
+                    0_f64
                 }
             } else {
-                counter_increment
+                0_f64
             };
 
             // store as gauge for timeline graphs
@@ -66,7 +64,8 @@ impl MeasurementClient<Config> for IdleClient {
                 sample_type: SampleType::ElectricityConsumption,
                 sample_name: sample_config.sample_name,
                 metric_type: MetricType::Counter,
-                value: counter_value,
+                value: last_counter_value
+                    + sample_config.value_watt * instance_count * config.interval_seconds,
             });
         }
 
