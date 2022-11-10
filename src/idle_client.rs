@@ -3,19 +3,19 @@ use jarvis_lib::measurement_client::MeasurementClient;
 use jarvis_lib::model::{EntityType, Measurement, MetricType, Sample, SampleType};
 
 use chrono::Utc;
-use log::info;
 use std::error::Error;
+use tracing::info;
 use uuid::Uuid;
 
 pub struct IdleClient {}
 
 impl MeasurementClient<Config> for IdleClient {
-    fn get_measurement(
+    fn get_measurements(
         &self,
         config: Config,
-        last_measurement: Option<Measurement>,
-    ) -> Result<Measurement, Box<dyn Error>> {
-        info!("Writing measurement from idle config...");
+        last_measurements: Option<Vec<Measurement>>,
+    ) -> Result<Vec<Measurement>, Box<dyn Error>> {
+        info!("Writing measurements from idle config...");
 
         let mut measurement = Measurement {
             id: Uuid::new_v4().to_string(),
@@ -33,19 +33,27 @@ impl MeasurementClient<Config> for IdleClient {
             };
 
             // get previous counter value to have a continuously increasing counter
-            let last_counter_value: f64 = if let Some(last_measurement) = last_measurement.as_ref()
-            {
-                if let Some(sample) = last_measurement.samples.iter().find(|s| {
-                    s.sample_name == sample_config.sample_name
-                        && s.metric_type == MetricType::Counter
-                }) {
-                    sample.value
+            let last_counter_value: f64 =
+                if let Some(last_measurements) = last_measurements.as_ref() {
+                    if !last_measurements.is_empty() {
+                        if let Some(sample) = last_measurements[last_measurements.len() - 1]
+                            .samples
+                            .iter()
+                            .find(|s| {
+                                s.sample_name == sample_config.sample_name
+                                    && s.metric_type == MetricType::Counter
+                            })
+                        {
+                            sample.value
+                        } else {
+                            0_f64
+                        }
+                    } else {
+                        0_f64
+                    }
                 } else {
                     0_f64
-                }
-            } else {
-                0_f64
-            };
+                };
 
             // store as gauge for timeline graphs
             measurement.samples.push(Sample {
@@ -69,7 +77,7 @@ impl MeasurementClient<Config> for IdleClient {
             });
         }
 
-        Ok(measurement)
+        Ok(vec![measurement])
     }
 }
 
